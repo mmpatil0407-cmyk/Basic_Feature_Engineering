@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Prediction Model - Linear Regression</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2::before {
+            content: '📊';
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .tech-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .tech-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tech-item span {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .steps-list {
+            list-style: none;
+            counter-reset: step;
+        }
+        
+        .steps-list li {
+            counter-increment: step;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 10px;
+            position: relative;
+            padding-left: 60px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .steps-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .model-output {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .output-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #667eea;
+        }
+        
+        .output-card h3 {
+            color: #667eea;
+            font-size: 1em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .output-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .output-card.highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .output-card.highlight h3,
+        .output-card.highlight .value {
+            color: white;
+        }
+        
+        .chart-placeholder {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .chart-placeholder h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .chart-visual {
+            height: 300px;
+            background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scatter-point {
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            position: absolute;
+            opacity: 0.8;
+        }
+        
+        .regression-line {
+            position: absolute;
+            width: 80%;
+            height: 3px;
+            background: #ff4757;
+            top: 50%;
+            transform: rotate(-15deg);
+            transform-origin: left center;
+        }
+        
+        .install-code {
+            background: #2d3436;
+            color: #00cec9;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        
+        .install-code code {
+            font-size: 1.1em;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        footer {
+            background: #2d3436;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        footer p {
+            opacity: 0.8;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .model-output {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Salary Prediction Model</h1>
+            <p>Machine Learning Project using Linear Regression</p>
+        </header>
+        
+        <div class="content">
+            <!-- Technologies Section -->
+            <div class="section animate delay-1">
+                <h2>Technologies Used</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <span>🐍</span>
+                        <strong>Python</strong>
+                    </div>
+                    <div class="tech-item">
+                        <span>🐼</span>
+                        <strong>Pandas</strong>
+                    </div>
+                    <div class="tech-item">
+                        <span>📈</span>
+                        <strong>NumPy</strong>
+                    </div>
+                    <div class="tech-item">
+                        <span>📊</span>
+                        <strong>Matplotlib</strong>
+                    </div>
+                    <div class="tech-item">
+                        <span>🤖</span>
+                        <strong>Scikit-learn</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project Steps Section -->
+            <div class="section animate delay-2">
+                <h2>Steps in the Project</h2>
+                <ol class="steps-list">
+                    <li>Import required libraries</li>
+                    <li>Create dataset with employee information</li>
+                    <li>Filter IT department data</li>
+                    <li>Define features (Experience) and target variable (Salary)</li>
+                    <li>Split data into training and testing sets (80/20)</li>
+                    <li>Train Linear Regression model</li>
+                    <li>Evaluate model performance</li>
+                    <li>Visualize regression line with scatter plot</li>
+                    <li>Predict salary for new experience values</li>
+                </ol>
+            </div>
+            
+            <!-- Dataset Section -->
+            <div class="section animate delay-3">
+                <h2>📋 IT Department Dataset</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Age</th>
+                            <th>Salary</th>
+                            <th>Department</th>
+                            <th>Experience (Years)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>30</td>
+                            <td>$60,000</td>
+                            <td>IT</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>40</td>
+                            <td>$70,000</td>
+                            <td>IT</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td>45</td>
+                            <td>$75,000</td>
+                            <td>IT</td>
+                            <td>15</td>
+                        </tr>
+                        <tr>
+                            <td>27</td>
+                            <td>$52,000</td>
+                            <td>IT</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>31</td>
+                            <td>$59,000</td>
+                            <td>IT</td>
+                            <td>4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Model Output Section -->
+            <div class="section animate delay-4">
+                <h2>📈 Model Results</h2>
+                <div class="model-output">
+                    <div class="output-card">
+                        <h3>Intercept</h3>
+                        <div class="value">$50,817</div>
+                    </div>
+                    <div class="output-card">
+                        <h3>Coefficient</h3>
+                        <div class="value">$1,644</div>
+                    </div>
+                    <div class="output-card">
+                        <h3>Mean Squared Error</h3>
+                        <div class="value">7,548,892</div>
+                    </div>
+                    <div class="output-card highlight">
+                        <h3>Predicted Salary</h3>
+                        <div class="value">$60,678</div>
+                        <small>for 6 years experience</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visualization Section -->
+            <div class="section animate delay-4">
+                <h2>📉 Visualization</h2>
+                <div class="chart-placeholder">
+                    <h3>Salary Prediction (IT Department)</h3>
+                    <div class="chart-visual">
+                        <!-- Scatter points representing data -->
+                        <div class="scatter-point" style="left: 20%; top: 60%;"></div>
+                        <div class="scatter-point" style="left: 35%; top: 45%;"></div>
+                        <div class="scatter-point" style="left: 50%; top: 30%;"></div>
+                        <div class="scatter-point" style="left: 15%; top: 70%;"></div>
+                        <div class="scatter-point" style="left: 25%; top: 55%;"></div>
+                        <!-- Regression line -->
+                        <div class="regression-line"></div>
+                    </div>
+                    <p style="margin-top: 20px; color: #666;">
+                        <strong>X-Axis:</strong> Experience (Years) &nbsp;|&nbsp; 
+                        <strong>Y-Axis:</strong> Salary ($)
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Installation Section -->
+            <div class="section animate delay-4">
+                <h2>⚙️ How to Run</h2>
+                <p>Install the required dependencies:</p>
+                <div class="install-code">
+                    <code>pip install pandas numpy matplotlib scikit-learn</code>
+                </div>
+            </div>
+            
+            <!-- Formula Section -->
+            <div class="section animate delay-4">
+                <h2>📐 Linear Regression Formula</h2>
+                <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                    <p style="font-size: 1.5em; color: #333;">
+                        <strong>Salary = 50,817 + 1,644 × Experience</strong>
+                    </p>
+                    <p style="margin-top: 15px; color: #666;">
+                        This means for each additional year of experience, the salary increases by approximately <strong>$1,644</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>ML Project - Linear Regression | Built with Python & Scikit-learn</p>
+        </footer>
+    </div>
+</body>
+</html>
+
